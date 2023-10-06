@@ -112,10 +112,6 @@ __attribute__((visibility("hidden")))
     
 }
 
-- (void) hook_setCurrentSubscription:(VSSubscription *)currentSubscription {
-    // do nothing
-}
-
 bool menuWasCreated = false;
 - (id) initWithRootMenuHook:(id)rootMenu {
     self = [self initWithRootMenuHook:rootMenu];
@@ -161,7 +157,8 @@ bool menuWasCreated = false;
             // This is an experimental fix
             if ([[PlaySettings shared] inverseScreenValues]) {
                 // This lines set External Scene settings and other IOS10 Runtime services by swizzling
-                [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frameDefault)];
+                // In Sonoma 14.1 betas, frame method seems to be moved to FBSSceneSettingsCore
+                // [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frameDefault)];
                 [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(bounds) withMethod:@selector(hook_boundsDefault)];
                 [objc_getClass("FBSDisplayMode") swizzleInstanceMethod:@selector(size) withMethod:@selector(hook_sizeDelfault)];
                 
@@ -172,7 +169,7 @@ bool menuWasCreated = false;
                 [objc_getClass("UIScreen") swizzleInstanceMethod:@selector(scale) withMethod:@selector(hook_scale)];
             } else {
                 // This acutally runs when adaptiveDisplay is normally triggered
-                [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frame)];
+                // [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frame)];
                 [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(bounds) withMethod:@selector(hook_bounds)];
                 [objc_getClass("FBSDisplayMode") swizzleInstanceMethod:@selector(size) withMethod:@selector(hook_size)];
                 
@@ -193,7 +190,7 @@ bool menuWasCreated = false;
                 CGFloat newValueH = (CGFloat)[self get_default_height];
                 [[PlaySettings shared] setValue:@(newValueH) forKey:@"windowSizeHeight"];
                 if (![[PlaySettings shared] inverseScreenValues]) {
-                    [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frameDefault)];
+                    // [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frameDefault)];
                     [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(bounds) withMethod:@selector(hook_boundsDefault)];
                     [objc_getClass("FBSDisplayMode") swizzleInstanceMethod:@selector(size) withMethod:@selector(hook_sizeDelfault)];
                 }
@@ -207,7 +204,7 @@ bool menuWasCreated = false;
     } 
     else {
         if ([[PlaySettings shared] adaptiveDisplay]) {
-                [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frame)];
+                // [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(frame) withMethod:@selector(hook_frame)];
                 [objc_getClass("FBSSceneSettings") swizzleInstanceMethod:@selector(bounds) withMethod:@selector(hook_bounds)];
                 [objc_getClass("FBSDisplayMode") swizzleInstanceMethod:@selector(size) withMethod:@selector(hook_size)];
             }
@@ -215,8 +212,6 @@ bool menuWasCreated = false;
     
     [objc_getClass("_UIMenuBuilder") swizzleInstanceMethod:sel_getUid("initWithRootMenu:") withMethod:@selector(initWithRootMenuHook:)];
     [objc_getClass("IOSViewController") swizzleInstanceMethod:@selector(prefersPointerLocked) withMethod:@selector(hook_prefersPointerLocked)];
-
-    [objc_getClass("VSSubscriptionRegistrationCenter") swizzleInstanceMethod:@selector(setCurrentSubscription:) withMethod:@selector(hook_setCurrentSubscription:)];
 }
 
 @end
